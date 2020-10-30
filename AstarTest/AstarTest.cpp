@@ -45,7 +45,7 @@ void CalculatePath(int map[][5], int width, int height, int resultX[], int resul
 	AstarNode endAstarNode(DisOfNode(starNode, endNode), 0, nullptr, endNode->x, endNode->y);
 
 	closeNodesList.push_back(startAstarNode);
-	curCheckNode = make_shared<Node>(startAstarNode);
+	curCheckNode = make_shared<AstarNode>(startAstarNode);
 
 	while (curCheckNode != nullptr && (curCheckNode->x != endAstarNode.x || curCheckNode->y != endAstarNode.y))
 	{
