@@ -2,11 +2,14 @@
 #include <vector>
 #include "Node.h"
 #include "AstarNode.h"
+#include "BinaryHeap.h"
 #include <cmath>
 #include <float.h>
+#include "BinaryHeap.cpp"
 using namespace std;
 
-static vector<AstarNode> openNodesList;
+static vector<AstarNode> initVec;
+static BinaryHeap<AstarNode> openNodesList;
 static vector<AstarNode> closeNodesList;
 vector<vector<Node>> nodeMap;
 static shared_ptr<Node> starNode;
@@ -19,7 +22,6 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height);
 shared_ptr<AstarNode> UpdateOpenCloseNodeList();
 
 void CalculatePath(int map[][5], int width, int height, int resultX[], int resultY[]) {
-	openNodesList.clear();
 	closeNodesList.clear();
 
 	int count = 0;
@@ -91,7 +93,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(bottom, endNode);
 			AstarNode aStarNodeBottom(disFromStart, disFromEnd, centerNode, centerX, centerY + 1);
-			openNodesList.push_back(aStarNodeBottom);
+			openNodesList.Insert(aStarNodeBottom);
 		}
 		else
 		{
@@ -107,7 +109,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(top, endNode);
 			AstarNode aStarNodeTop(disFromStart, disFromEnd, centerNode, centerX, centerY - 1);
-			openNodesList.push_back(aStarNodeTop);
+			openNodesList.Insert(aStarNodeTop);
 		}
 		else
 		{
@@ -123,7 +125,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(left, endNode);
 			AstarNode aStarNodeLeft(disFromStart, disFromEnd, centerNode, centerX - 1, centerY);
-			openNodesList.push_back(aStarNodeLeft);
+			openNodesList.Insert(aStarNodeLeft);
 		}
 		else
 		{
@@ -139,7 +141,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(right, endNode);
 			AstarNode aStarNodeRight(disFromStart, disFromEnd, centerNode, centerX + 1, centerY);
-			openNodesList.push_back(aStarNodeRight);
+			openNodesList.Insert(aStarNodeRight);
 		}
 		else
 		{
@@ -155,7 +157,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(leftBottom, endNode);
 			AstarNode aStarNodeLeftBottom(disFromStart, disFromEnd, centerNode, centerX - 1, centerY + 1);
-			openNodesList.push_back(aStarNodeLeftBottom);
+			openNodesList.Insert(aStarNodeLeftBottom);
 		}
 	}
 
@@ -167,7 +169,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(leftTop, endNode);
 			AstarNode aStarNodeLeftTop(disFromStart, disFromEnd, centerNode, centerX - 1, centerY - 1);
-			openNodesList.push_back(aStarNodeLeftTop);
+			openNodesList.Insert(aStarNodeLeftTop);
 		}
 	}
 
@@ -179,7 +181,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(rightBottom, endNode);
 			AstarNode aStarNodeRightBottom(disFromStart, disFromEnd, centerNode, centerX + 1, centerY + 1);
-			openNodesList.push_back(aStarNodeRightBottom);
+			openNodesList.Insert(aStarNodeRightBottom);
 		}
 	}
 
@@ -191,7 +193,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(rightTop, endNode);
 			AstarNode aStarNodeLeftTop(disFromStart, disFromEnd, centerNode, centerX + 1, centerY - 1);
-			openNodesList.push_back(aStarNodeLeftTop);
+			openNodesList.Insert(aStarNodeLeftTop);
 		}
 	}
 }
@@ -201,23 +203,12 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 /// </summary>
 /// <param name="curCheckNode"></param>
 shared_ptr<AstarNode> UpdateOpenCloseNodeList() {
-	shared_ptr<AstarNode> mincostNode;
-	float curCost = FLT_MAX;
-	//选择开启列表中消耗最小的点移动到关闭列表，要是为Null,curCheckNode = null
-	for (auto itBegin = openNodesList.begin(); itBegin != openNodesList.end(); itBegin++) {
-		if ((*itBegin).GetCost() < curCost) {
-			curCost = (*itBegin).GetCost();
-			mincostNode = make_shared<AstarNode>(*itBegin);
-		}
-	}
-
-	for (auto it = openNodesList.begin(); it != openNodesList.end(); it++) {
-		if ((*it).x == mincostNode->x && (*it).y == mincostNode->y) {
-			it = openNodesList.erase(it);
-			break;
-		}
-	}
-	closeNodesList.push_back(*mincostNode);
+	openNodesList.DeleteMin();
+	//AstarNode& min = openNodesList.DeleteMin();
+	/*shared_ptr<AstarNode> mincostNode = make_shared<AstarNode>();
+	closeNodesList.push_back(min);
+	return mincostNode;*/
+	shared_ptr<AstarNode> mincostNode = make_shared<AstarNode>();
 	return mincostNode;
 }
 
@@ -234,6 +225,7 @@ float DisOfNode(shared_ptr<Node> node1, shared_ptr<Node> node2) {
 
 int main()
 {
+	BinaryHeap<AstarNode> openNodesList(initVec);
 	int map[5][5] = { {0,0,0,0,0},
 					  {0,1,0,0,0},
 					  {0,3,3,3,0},
