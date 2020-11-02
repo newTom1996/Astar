@@ -20,6 +20,12 @@ bool BinaryHeap<T>::IsEmpty() {
 }
 
 template<typename T>
+const bool operator <(const T& a,const T& b)
+{
+    return a.GetCost() < b.GetCost();
+}
+
+template<typename T>
 void BinaryHeap<T>::Insert(const T& x) {
     if (currentSize == array.size() - 1) {
         array.resize(array.size() * 2);

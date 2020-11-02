@@ -10,6 +10,6 @@ AstarNode::~AstarNode() {
 
 }
 
-float AstarNode::GetCost() {
+float AstarNode::GetCost() const {
 	return h + g;
 }
