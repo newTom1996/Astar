@@ -9,7 +9,7 @@
 using namespace std;
 
 static vector<AstarNode> initVec;
-static BinaryHeap<AstarNode> openNodesList;
+static BinaryHeap<AstarNode> openNodesList(initVec);
 static vector<AstarNode> closeNodesList;
 vector<vector<Node>> nodeMap;
 static shared_ptr<Node> starNode;
@@ -20,6 +20,7 @@ void CalculatePath(int map[][5], int width, int height, int resultX[], int resul
 float DisOfNode(shared_ptr<Node> node1, shared_ptr<Node> node2);
 void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height);
 shared_ptr<AstarNode> UpdateOpenCloseNodeList();
+bool IsContains(AstarNode node, vector<AstarNode>& aStarNodeList);
 
 void CalculatePath(int map[][5], int width, int height, int resultX[], int resultY[]) {
 	closeNodesList.clear();
@@ -93,7 +94,11 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(bottom, endNode);
 			AstarNode aStarNodeBottom(disFromStart, disFromEnd, centerNode, centerX, centerY + 1);
-			openNodesList.Insert(aStarNodeBottom);
+
+			if (!IsContains(aStarNodeBottom, closeNodesList) && !openNodesList.IsContains(aStarNodeBottom)) {
+				openNodesList.Insert(aStarNodeBottom);
+			}
+			
 		}
 		else
 		{
@@ -109,7 +114,10 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(top, endNode);
 			AstarNode aStarNodeTop(disFromStart, disFromEnd, centerNode, centerX, centerY - 1);
-			openNodesList.Insert(aStarNodeTop);
+
+			if (!IsContains(aStarNodeTop, closeNodesList) && !openNodesList.IsContains(aStarNodeTop)) {
+				openNodesList.Insert(aStarNodeTop);
+			}
 		}
 		else
 		{
@@ -125,7 +133,10 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(left, endNode);
 			AstarNode aStarNodeLeft(disFromStart, disFromEnd, centerNode, centerX - 1, centerY);
-			openNodesList.Insert(aStarNodeLeft);
+
+			if (!IsContains(aStarNodeLeft, closeNodesList) && !openNodesList.IsContains(aStarNodeLeft)) {
+				openNodesList.Insert(aStarNodeLeft);
+			}
 		}
 		else
 		{
@@ -141,7 +152,10 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1;
 			float disFromEnd = DisOfNode(right, endNode);
 			AstarNode aStarNodeRight(disFromStart, disFromEnd, centerNode, centerX + 1, centerY);
-			openNodesList.Insert(aStarNodeRight);
+
+			if (!IsContains(aStarNodeRight, closeNodesList) && !openNodesList.IsContains(aStarNodeRight)) {
+				openNodesList.Insert(aStarNodeRight);
+			}
 		}
 		else
 		{
@@ -157,7 +171,10 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(leftBottom, endNode);
 			AstarNode aStarNodeLeftBottom(disFromStart, disFromEnd, centerNode, centerX - 1, centerY + 1);
-			openNodesList.Insert(aStarNodeLeftBottom);
+
+			if (!IsContains(aStarNodeLeftBottom, closeNodesList) && !openNodesList.IsContains(aStarNodeLeftBottom)) {
+				openNodesList.Insert(aStarNodeLeftBottom);
+			}
 		}
 	}
 
@@ -169,7 +186,10 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(leftTop, endNode);
 			AstarNode aStarNodeLeftTop(disFromStart, disFromEnd, centerNode, centerX - 1, centerY - 1);
-			openNodesList.Insert(aStarNodeLeftTop);
+
+			if (!IsContains(aStarNodeLeftTop, closeNodesList) && !openNodesList.IsContains(aStarNodeLeftTop)) {
+				openNodesList.Insert(aStarNodeLeftTop);
+			}
 		}
 	}
 
@@ -181,7 +201,10 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(rightBottom, endNode);
 			AstarNode aStarNodeRightBottom(disFromStart, disFromEnd, centerNode, centerX + 1, centerY + 1);
-			openNodesList.Insert(aStarNodeRightBottom);
+
+			if (!IsContains(aStarNodeRightBottom, closeNodesList) && !openNodesList.IsContains(aStarNodeRightBottom)) {
+				openNodesList.Insert(aStarNodeRightBottom);
+			}
 		}
 	}
 
@@ -193,7 +216,10 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 			float disFromStart = centerNode->g + 1.4f;
 			float disFromEnd = DisOfNode(rightTop, endNode);
 			AstarNode aStarNodeLeftTop(disFromStart, disFromEnd, centerNode, centerX + 1, centerY - 1);
-			openNodesList.Insert(aStarNodeLeftTop);
+
+			if (!IsContains(aStarNodeLeftTop, closeNodesList) && !openNodesList.IsContains(aStarNodeLeftTop)) {
+				openNodesList.Insert(aStarNodeLeftTop);
+			}
 		}
 	}
 }
@@ -203,12 +229,9 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 /// </summary>
 /// <param name="curCheckNode"></param>
 shared_ptr<AstarNode> UpdateOpenCloseNodeList() {
-	openNodesList.DeleteMin();
-	//AstarNode& min = openNodesList.DeleteMin();
-	/*shared_ptr<AstarNode> mincostNode = make_shared<AstarNode>();
+	AstarNode& min = openNodesList.DeleteMin();
+	shared_ptr<AstarNode> mincostNode = make_shared<AstarNode>(min);
 	closeNodesList.push_back(min);
-	return mincostNode;*/
-	shared_ptr<AstarNode> mincostNode = make_shared<AstarNode>();
 	return mincostNode;
 }
 
@@ -223,9 +246,23 @@ float DisOfNode(shared_ptr<Node> node1, shared_ptr<Node> node2) {
 	return result;
 }
 
+/// <summary>
+/// 是否包含
+/// </summary>
+/// <param name="node"></param>
+/// <param name="aStarNodeList"></param>
+/// <returns></returns>
+bool IsContains(AstarNode node, vector<AstarNode>& aStarNodeList) {
+	for (size_t i = 0; i < aStarNodeList.size(); i++) {
+		if (node.x == aStarNodeList[i].x && node.y == aStarNodeList[i].y) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int main()
 {
-	BinaryHeap<AstarNode> openNodesList(initVec);
 	int map[5][5] = { {0,0,0,0,0},
 					  {0,1,0,0,0},
 					  {0,3,3,3,0},

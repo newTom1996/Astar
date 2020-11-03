@@ -12,6 +12,7 @@ public:
     T& FindMin() const;
     void Insert(const T& x);
     T& DeleteMin();
+    bool IsContains(const T& x);
 private:
     int currentSize;
     vector<T> array;

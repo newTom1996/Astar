@@ -76,3 +76,13 @@ void BinaryHeap<T>::BuildHeap() {
     for (int i = currentSize / 2; i > 0; i--)
         PercolateDown(i);
 }
+
+template<typename T>
+bool BinaryHeap<T>::IsContains(const T& a) {
+    for (int i = 1; i <= currentSize; i++) {
+        if (a.x == array[i].x && a.y == array[i].y) {
+            return true;
+        }
+    }
+    return false;
+}
