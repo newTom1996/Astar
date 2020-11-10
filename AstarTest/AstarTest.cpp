@@ -94,7 +94,16 @@ void CalculatePath(int map[][10], int width, int height, int resultX[], int resu
 /// </summary>
 /// <param name="nodesList"></param>
 void OptimizedPath(vector<Node>& nodesList) {
-	if (nodesList.size() > 2) {
+	vector<Node> nodes;
+	Node endNode(*endNode);
+	nodes.push_back(endNode);
+	for (size_t i = 0; i < nodesList.size(); i++) {
+		nodes.push_back(nodesList[i]);
+	}
+	Node starNode(*starNode);
+	nodes.push_back(starNode);
+	DichotomyEliminate(nodes, 0, nodes.size() - 1);
+	/*if (nodesList.size() > 2) {
 		vector<Node> nodes;
 		nodes.push_back(nodesList[0]);
 		Node direction(0, nodesList[0].x - endNode->x, nodesList[0].y - endNode->y);
@@ -113,10 +122,10 @@ void OptimizedPath(vector<Node>& nodesList) {
 	}
 	else
 	{
-		for (size_t i = 1; i < nodesList.size(); i++) {
+		for (size_t i = 0; i < nodesList.size(); i++) {
 			pathNodesList.push_back(nodesList[i]);
 		}
-	}
+	}*/
 }
 
 /// <summary>
@@ -128,18 +137,27 @@ void OptimizedPath(vector<Node>& nodesList) {
 void DichotomyEliminate(vector<Node>& nodes,int minIndex,int maxIndex) {
 	//两个点相邻
 	if (maxIndex - minIndex <= 1) {
-		pathNodesList.push_back(nodes[minIndex]);
-		pathNodesList.push_back(nodes[maxIndex]);
+		if (!IsContains(nodes[minIndex], pathNodesList)) {
+			pathNodesList.push_back(nodes[minIndex]);
+		}
+		if (!IsContains(nodes[maxIndex], pathNodesList)) {
+			pathNodesList.push_back(nodes[maxIndex]);
+		}
+	
 	}
 	else
 	{
 		if (!IsCrossObstacle(nodes[minIndex], nodes[maxIndex])) {
-			pathNodesList.push_back(nodes[minIndex]);
-			pathNodesList.push_back(nodes[maxIndex]);
+			if (!IsContains(nodes[minIndex], pathNodesList)) {
+				pathNodesList.push_back(nodes[minIndex]);
+			}
+			if (!IsContains(nodes[maxIndex], pathNodesList)) {
+				pathNodesList.push_back(nodes[maxIndex]);
+			}
 		}
 		else
 		{
-			int middleIndex = (maxIndex - minIndex) / 2;
+			int middleIndex = (maxIndex - minIndex + 1) / 2;
 			DichotomyEliminate(nodes, minIndex, middleIndex);
 			DichotomyEliminate(nodes, middleIndex, maxIndex);
 		}
@@ -184,9 +202,9 @@ bool IsCrossObstacle(Node& node1, Node& node2) {
 			float k = (node1.y - node2.y) / (node1.x - node2.x);
 			for (int i = 1; i < abs(node2.x - node1.x); i++) {
 				int sign = node1.x - node2.x > 0 ? 1 : -1;
-				int checkX = min(node2.x + i * sign, 10);	//TODO 数组大小
+				int checkX = min(node2.x + i * sign, 9);	//TODO 数组大小
 				checkX = max(0, checkX);
-				int checkY = min(int(node2.y + checkX * k), 10);//TODO 数组大小
+				int checkY = min(int(node2.y + checkX * k), 9);//TODO 数组大小
 				checkY = max(0, checkY);
 				if (nodeMap[checkX][checkY].type == 3) {
 					return true;
@@ -396,6 +414,16 @@ bool IsContains(Node node, vector<Node>& nodesList) {
 
 int main()
 {
+	/*int map[10][10] = { {1,0,0,0,0,0,0,0,0,0},
+					  {0,-,-,-,0,0,0,0,0,0},
+					  {0,3,3,3,-,0,0,0,0,0},
+					  {0,0,0,3,0,-,-,0,0,0},
+					  {0,0,3,3,3,3,3,-,0,0},
+					  {0,0,3,3,3,3,3,0,-,0},
+					  {0,0,0,0,0,0,0,0,0,-},
+					  {0,0,0,0,0,0,0,0,0,-},
+					  {0,0,0,0,0,0,0,0,0,-},
+					  {0,0,0,0,0,0,0,0,0,2} };*/
 	int map[10][10] = { {1,0,0,0,0,0,0,0,0,0},
 					  {0,0,0,0,0,0,0,0,0,0},
 					  {0,3,3,3,0,0,0,0,0,0},
