@@ -6,23 +6,29 @@
 #include <cmath>
 #include <float.h>
 #include "BinaryHeap.cpp"
+#include <algorithm>
 using namespace std;
 
 static vector<AstarNode> initVec;
 static BinaryHeap<AstarNode> openNodesList(initVec);
 static vector<AstarNode> closeNodesList;
+static vector<Node> pathNodesList;
 vector<vector<Node>> nodeMap;
 static shared_ptr<Node> starNode;
 static shared_ptr<Node> endNode;
 shared_ptr<AstarNode> curCheckNode;
 
-void CalculatePath(int map[][5], int width, int height, int resultX[], int resultY[]);
+void CalculatePath(int map[][10], int width, int height, int resultX[], int resultY[]);
 float DisOfNode(shared_ptr<Node> node1, shared_ptr<Node> node2);
 void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height);
 shared_ptr<AstarNode> UpdateOpenCloseNodeList();
 bool IsContains(AstarNode node, vector<AstarNode>& aStarNodeList);
+bool IsContains(Node node, vector<Node>& nodesList);
+void OptimizedPath(vector<Node>& nodesList);
+void DichotomyEliminate(vector<Node>& nodes, int minIndex, int maxIndex);
+bool IsCrossObstacle(Node& node1, Node& node2);
 
-void CalculatePath(int map[][5], int width, int height, int resultX[], int resultY[]) {
+void CalculatePath(int map[][10], int width, int height, int resultX[], int resultY[]) {
 	closeNodesList.clear();
 
 	int count = 0;
@@ -62,14 +68,131 @@ void CalculatePath(int map[][5], int width, int height, int resultX[], int resul
 
 	//结果
 	int resultCount = 0;
+	vector<Node> tempPathNodesList;
 	if (closeNodesList.back().x == endNode->x && closeNodesList.back().y == endNode->y) {
 		shared_ptr<AstarNode> curNode = closeNodesList.back().parentNode;
 		while (curNode->x != starNode->x || curNode->y != starNode->y)
 		{
-			resultX[resultCount] = curNode->x;
+			/*resultX[resultCount] = curNode->x;
 			resultY[resultCount] = curNode->y;
-			resultCount++;
+			resultCount++;*/
+			tempPathNodesList.push_back(Node(0, curNode->x, curNode->y));
 			curNode = curNode->parentNode;
+		}
+	}
+	//平滑路径
+	OptimizedPath(tempPathNodesList);
+
+	for (size_t i = 0; i < pathNodesList.size(); i++) {
+		resultX[i] = pathNodesList[i].x;
+		resultY[i] = pathNodesList[i].y;
+	}
+}
+
+/// <summary>
+/// 优化路径
+/// </summary>
+/// <param name="nodesList"></param>
+void OptimizedPath(vector<Node>& nodesList) {
+	if (nodesList.size() > 2) {
+		vector<Node> nodes;
+		nodes.push_back(nodesList[0]);
+		Node direction(0, nodesList[0].x - endNode->x, nodesList[0].y - endNode->y);
+		for (size_t i = 1; i < nodesList.size(); i++) {
+			if (nodesList[i].x - nodesList[i - 1].x == direction.x && nodesList[i].y - nodesList[i - 1].y == direction.y) {
+
+			}
+			else
+			{
+				nodes.push_back(nodesList[i]);
+				direction.x = nodesList[i].x - nodesList[i - 1].x;
+				direction.y = nodesList[i].y - nodesList[i - 1].y;
+			}
+		}
+		DichotomyEliminate(nodes, 0, nodes.size() - 1);
+	}
+	else
+	{
+		for (size_t i = 1; i < nodesList.size(); i++) {
+			pathNodesList.push_back(nodesList[i]);
+		}
+	}
+}
+
+/// <summary>
+/// 二分剔除多余的点
+/// </summary>
+/// <param name="nodes"></param>
+/// <param name="index1"></param>
+/// <param name="index2"></param>
+void DichotomyEliminate(vector<Node>& nodes,int minIndex,int maxIndex) {
+	//两个点相邻
+	if (maxIndex - minIndex <= 1) {
+		pathNodesList.push_back(nodes[minIndex]);
+		pathNodesList.push_back(nodes[maxIndex]);
+	}
+	else
+	{
+		if (!IsCrossObstacle(nodes[minIndex], nodes[maxIndex])) {
+			pathNodesList.push_back(nodes[minIndex]);
+			pathNodesList.push_back(nodes[maxIndex]);
+		}
+		else
+		{
+			int middleIndex = (maxIndex - minIndex) / 2;
+			DichotomyEliminate(nodes, minIndex, middleIndex);
+			DichotomyEliminate(nodes, middleIndex, maxIndex);
+		}
+	}
+}
+
+/// <summary>
+/// 是否经过障碍点
+/// </summary>
+/// <param name="index1"></param>
+/// <param name="index2"></param>
+/// <returns></returns>
+bool IsCrossObstacle(Node& node1, Node& node2) {
+	if (abs(node1.x - node2.x) <= 1 && abs(node1.y - node2.y) <= 1) {
+		return false;
+	}
+	else
+	{
+		if (abs(node1.x - node2.x) <= 1) {
+			int nodeYCheckStart = min(node1.y, node2.y);
+			for (int i = 1; i < abs(node2.y - node1.y); i++) {
+				int yIndex = nodeYCheckStart + i;
+				if (nodeMap[node1.x][yIndex].type == 3 || nodeMap[node2.x][yIndex].type == 3) {
+					return true;
+				}
+			}
+			return false;
+		}
+		else if (abs(node1.y - node2.y) <= 1) {
+			int nodeXCheckStart = min(node1.x, node2.x);
+			for (int i = 1; i < abs(node2.x - node1.x); i++) {
+				int xIndex = nodeXCheckStart + i;
+				if (nodeMap[xIndex][node1.y].type == 3 || nodeMap[xIndex][node2.y].type == 3) {
+					return true;
+				}
+			}
+			return false;
+		}
+		else
+		{
+			//斜率
+			float k = (node1.y - node2.y) / (node1.x - node2.x);
+			for (int i = 1; i < abs(node2.x - node1.x); i++) {
+				int sign = node1.x - node2.x > 0 ? 1 : -1;
+				int checkX = min(node2.x + i * sign, 10);	//TODO 数组大小
+				checkX = max(0, checkX);
+				int checkY = min(int(node2.y + checkX * k), 10);//TODO 数组大小
+				checkY = max(0, checkY);
+				if (nodeMap[checkX][checkY].type == 3) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }
@@ -261,27 +384,55 @@ bool IsContains(AstarNode node, vector<AstarNode>& aStarNodeList) {
 	return false;
 }
 
+bool IsContains(Node node, vector<Node>& nodesList) {
+	for (size_t i = 0; i < nodesList.size(); i++) {
+		if (node.x == nodesList[i].x && node.y == nodesList[i].y) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 int main()
 {
-	int map[5][5] = { {0,0,0,0,0},
-					  {0,1,0,0,0},
-					  {0,3,3,3,0},
-					  {0,0,0,3,0},
-					  {0,2,0,0,0} };
-	int resultX[25] = {0};
-	int resultY[25] = { 0};
-	CalculatePath(map,5,5, resultX, resultY);
-	for (int i = 0; i < 5; i++) {
-		for(int j = 0; j < 5; j++) {
+	int map[10][10] = { {1,0,0,0,0,0,0,0,0,0},
+					  {0,0,0,0,0,0,0,0,0,0},
+					  {0,3,3,3,0,0,0,0,0,0},
+					  {0,0,0,3,0,0,0,0,0,0},
+					  {0,0,3,3,3,3,3,0,0,0},
+					  {0,0,3,3,3,3,3,0,0,0},
+		              {0,0,0,0,0,0,0,0,0,0},
+		              {0,0,0,0,0,0,0,0,0,0},
+			          {0,0,0,0,0,0,0,0,0,0},
+					  {0,0,0,0,0,0,0,0,0,2} };
+	int resultX[100] = {0};
+	int resultY[100] = { 0};
+	CalculatePath(map,10,10, resultX, resultY);
+	for (int i = 0; i < 10; i++) {
+		for(int j = 0; j < 10; j++) {
 			cout << nodeMap[i][j].type<<" ";
 		}
 		cout << endl;
 	}
-	cout << "结果" << endl;
-	for (int i = 0; i < 25; i++) {
+	cout << "结果：" << endl;
+	for (int i = 0; i < 100; i++) {
 		if (resultX[i] == 0 && resultY[i] == 0) {
 			continue;
 		}
 		cout << "(" << resultX[i] << "," << resultY[i] << ")"<<endl;
+	}
+	cout << "包含结果的地图：" << endl;
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			if (IsContains(nodeMap[i][j],pathNodesList)) {
+				cout << "-" << " ";
+			}
+			else
+			{
+				cout << nodeMap[i][j].type << " ";
+			}
+		}
+		cout << endl;
 	}
 }
