@@ -229,7 +229,7 @@ void CheckNeighborNode(shared_ptr<AstarNode> centerNode, int width, int height) 
 /// </summary>
 /// <param name="curCheckNode"></param>
 shared_ptr<AstarNode> UpdateOpenCloseNodeList() {
-	AstarNode& min = openNodesList.DeleteMin();
+	AstarNode min = openNodesList.DeleteMin();
 	shared_ptr<AstarNode> mincostNode = make_shared<AstarNode>(min);
 	closeNodesList.push_back(min);
 	return mincostNode;

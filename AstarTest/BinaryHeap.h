@@ -11,7 +11,7 @@ public:
     bool IsEmpty();
     T& FindMin() const;
     void Insert(const T& x);
-    T& DeleteMin();
+    T DeleteMin();
     bool IsContains(const T& x);
 private:
     int currentSize;

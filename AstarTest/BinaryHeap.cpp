@@ -41,11 +41,11 @@ void BinaryHeap<T>::Insert(const T& x) {
 }
 
 template<typename T>
-T& BinaryHeap<T>::DeleteMin() {
+T BinaryHeap<T>::DeleteMin() {
     if (IsEmpty()) {
         std::cout << "The heap is empty!" << std::endl;
     }
-    T& result = array[1];
+    T result(array[1]);
     //将array中最后一个数赋值给第一个元素，array元素个数减一；然后开始下滤
     array[1] = array[currentSize--];
     PercolateDown(1);
