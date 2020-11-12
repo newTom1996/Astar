@@ -73,20 +73,22 @@ void CalculatePath(int map[][10], int width, int height, int resultX[], int resu
 		shared_ptr<AstarNode> curNode = closeNodesList.back().parentNode;
 		while (curNode->x != starNode->x || curNode->y != starNode->y)
 		{
-			/*resultX[resultCount] = curNode->x;
+			resultX[resultCount] = curNode->x;
 			resultY[resultCount] = curNode->y;
-			resultCount++;*/
-			tempPathNodesList.push_back(Node(0, curNode->x, curNode->y));
+			pathNodesList.push_back(Node(0, curNode->x, curNode->y));
+			resultCount++;
 			curNode = curNode->parentNode;
+		/*	tempPathNodesList.push_back(Node(0, curNode->x, curNode->y));
+			curNode = curNode->parentNode;*/
 		}
 	}
 	//平滑路径
-	OptimizedPath(tempPathNodesList);
+	//OptimizedPath(tempPathNodesList);
 
-	for (size_t i = 0; i < pathNodesList.size(); i++) {
+	/*for (size_t i = 0; i < pathNodesList.size(); i++) {
 		resultX[i] = pathNodesList[i].x;
 		resultY[i] = pathNodesList[i].y;
-	}
+	}*/
 }
 
 /// <summary>
@@ -425,14 +427,14 @@ int main()
 					  {0,0,0,0,0,0,0,0,0,-},
 					  {0,0,0,0,0,0,0,0,0,2} };*/
 	int map[10][10] = { {1,0,0,0,0,0,0,0,0,0},
-					  {0,0,0,0,0,0,0,0,0,0},
+					  {0,3,3,3,3,3,3,3,0,0},
 					  {0,3,3,3,0,0,0,0,0,0},
 					  {0,0,0,3,0,0,0,0,0,0},
 					  {0,0,3,3,3,3,3,0,0,0},
 					  {0,0,3,3,3,3,3,0,0,0},
-		              {0,0,0,0,0,0,0,0,0,0},
-		              {0,0,0,0,0,0,0,0,0,0},
-			          {0,0,0,0,0,0,0,0,0,0},
+		              {0,0,0,0,0,0,0,0,0,3},
+		              {0,0,0,0,0,0,3,3,3,3},
+			          {3,3,3,3,3,0,3,0,0,0},
 					  {0,0,0,0,0,0,0,0,0,2} };
 	int resultX[100] = {0};
 	int resultY[100] = { 0};
