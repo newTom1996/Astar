@@ -86,3 +86,8 @@ bool BinaryHeap<T>::IsContains(const T& a) {
     }
     return false;
 }
+
+template<typename T>
+void BinaryHeap<T>::Clear() {
+    currentSize = 0;
+}
