@@ -31,6 +31,8 @@ bool IsCrossObstacle(Node& node1, Node& node2);
 void CalculatePath(int map[][10], int width, int height, int resultX[], int resultY[]) {
 	closeNodesList.clear();
 	openNodesList.Clear();
+	nodeMap.clear();
+	pathNodesList.clear();
 
 	int count = 0;
 
@@ -74,17 +76,17 @@ void CalculatePath(int map[][10], int width, int height, int resultX[], int resu
 		shared_ptr<AstarNode> curNode = closeNodesList.back().parentNode;
 		while (curNode->x != starNode->x || curNode->y != starNode->y)
 		{
-			resultX[resultCount] = curNode->x;
+		/*	resultX[resultCount] = curNode->x;
 			resultY[resultCount] = curNode->y;
 			pathNodesList.push_back(Node(0, curNode->x, curNode->y));
 			resultCount++;
-			curNode = curNode->parentNode;
-		/*	tempPathNodesList.push_back(Node(0, curNode->x, curNode->y));
 			curNode = curNode->parentNode;*/
+			tempPathNodesList.push_back(Node(0, curNode->x, curNode->y));
+			curNode = curNode->parentNode;
 		}
 	}
 	//平滑路径
-	//OptimizedPath(tempPathNodesList);
+	OptimizedPath(tempPathNodesList);
 
 	/*for (size_t i = 0; i < pathNodesList.size(); i++) {
 		resultX[i] = pathNodesList[i].x;
@@ -106,29 +108,6 @@ void OptimizedPath(vector<Node>& nodesList) {
 	Node starNode(*starNode);
 	nodes.push_back(starNode);
 	DichotomyEliminate(nodes, 0, nodes.size() - 1);
-	/*if (nodesList.size() > 2) {
-		vector<Node> nodes;
-		nodes.push_back(nodesList[0]);
-		Node direction(0, nodesList[0].x - endNode->x, nodesList[0].y - endNode->y);
-		for (size_t i = 1; i < nodesList.size(); i++) {
-			if (nodesList[i].x - nodesList[i - 1].x == direction.x && nodesList[i].y - nodesList[i - 1].y == direction.y) {
-
-			}
-			else
-			{
-				nodes.push_back(nodesList[i]);
-				direction.x = nodesList[i].x - nodesList[i - 1].x;
-				direction.y = nodesList[i].y - nodesList[i - 1].y;
-			}
-		}
-		DichotomyEliminate(nodes, 0, nodes.size() - 1);
-	}
-	else
-	{
-		for (size_t i = 0; i < nodesList.size(); i++) {
-			pathNodesList.push_back(nodesList[i]);
-		}
-	}*/
 }
 
 /// <summary>
@@ -160,7 +139,7 @@ void DichotomyEliminate(vector<Node>& nodes,int minIndex,int maxIndex) {
 		}
 		else
 		{
-			int middleIndex = (maxIndex - minIndex + 1) / 2;
+			int middleIndex = (maxIndex - minIndex + 1) / 2 + minIndex;
 			DichotomyEliminate(nodes, minIndex, middleIndex);
 			DichotomyEliminate(nodes, middleIndex, maxIndex);
 		}
@@ -427,16 +406,16 @@ int main()
 					  {0,0,0,0,0,0,0,0,0,-},
 					  {0,0,0,0,0,0,0,0,0,-},
 					  {0,0,0,0,0,0,0,0,0,2} };*/
-	int map[10][10] = { {1,0,3,3,3,3,3,3,0,2},
+	int map[10][10] = { {1,0,3,3,3,3,3,3,0,0},
 					  {0,0,0,0,0,0,0,0,0,0},
 					  {0,0,0,0,0,0,0,0,0,0},
 					  {0,0,0,0,0,0,0,0,0,0},
-					  {0,0,0,0,0,0,0,0,0,0},
-					  {0,0,0,0,0,0,0,0,0,0},
+					  {0,0,3,3,3,0,0,0,0,0},
+					  {0,0,0,0,3,0,0,0,0,0},
+		              {0,0,0,0,3,3,3,3,0,0},
 		              {0,0,0,0,0,0,0,0,0,0},
-		              {0,0,0,0,0,0,0,0,0,0},
-			          {0,0,0,0,0,0,0,0,0,0},
-					  {0,0,0,0,0,0,0,0,0,0} };
+			          {0,0,0,0,0,0,0,0,0,3},
+					  {0,0,0,0,0,0,0,0,0,2} };
 	int resultX[100] = {0};
 	int resultY[100] = { 0};
 	CalculatePath(map,10,10, resultX, resultY);
