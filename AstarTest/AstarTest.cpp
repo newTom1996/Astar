@@ -182,11 +182,12 @@ bool IsCrossObstacle(Node& node1, Node& node2) {
 		{
 			//斜率
 			float k = (float)(node1.y - node2.y) / (float)(node1.x - node2.x);
+			float b = node2.y - node2.x * k;
 			for (int i = 1; i < abs(node2.x - node1.x); i++) {
 				int sign = node1.x - node2.x > 0 ? 1 : -1;
 				int checkX = min(node2.x + i * sign, 9);	//TODO 数组大小
 				checkX = max(0, checkX);
-				int checkY = min(int(node2.y + checkX * k), 9);//TODO 数组大小
+				int checkY = min(int(b + checkX * k), 9);//TODO 数组大小
 				checkY = max(0, checkY);
 				if (nodeMap[checkX][checkY].type == 3) {
 					return true;
@@ -369,7 +370,7 @@ shared_ptr<AstarNode> UpdateOpenCloseNodeList() {
 /// <param name="node2"></param>
 /// <returns></returns>
 float DisOfNode(shared_ptr<Node> node1, shared_ptr<Node> node2) {
-	float result = abs(node1->x - node2->x) + abs(node1->y - node2->y);
+	float result = (float)abs(node1->x - node2->x) + (float)abs(node1->y - node2->y);
 	return result;
 }
 
@@ -400,26 +401,16 @@ bool IsContains(Node node, vector<Node>& nodesList) {
 
 int main()
 {
-	/*int map[10][10] = { {1,0,0,0,0,0,0,0,0,0},
-					  {0,-,-,-,0,0,0,0,0,0},
-					  {0,3,3,3,-,0,0,0,0,0},
-					  {0,0,0,3,0,-,-,0,0,0},
-					  {0,0,3,3,3,3,3,-,0,0},
-					  {0,0,3,3,3,3,3,0,-,0},
-					  {0,0,0,0,0,0,0,0,0,-},
-					  {0,0,0,0,0,0,0,0,0,-},
-					  {0,0,0,0,0,0,0,0,0,-},
-					  {0,0,0,0,0,0,0,0,0,2} };*/
-	int map[10][10] = { {1,0,0,0,0,0,0,0,0,0},
-					  {0,3,3,3,3,3,3,3,3,0},
-					  {0,3,3,3,3,3,3,3,3,0},
-					  {0,0,3,3,0,0,0,0,0,0},
-					  {0,0,0,0,0,0,0,0,0},
-					  {0,0,0,0,0,0,0,0,0,0},
-		              {0,0,0,0,0,0,0,0,0,0},
-		              {0,0,0,0,0,3,3,3,3,3},
-			          {0,0,0,0,0,0,0,0,0,0},
-					  {0,0,0,0,0,0,0,0,0,2} };
+	int map[10][10] ={{0,0,3,0,0,0,0,3,0,2},
+					  {0,0,3,0,0,0,0,3,0,0},
+					  {0,0,3,0,0,0,0,3,0,0},
+					  {0,0,3,0,0,0,0,0,0,0},
+					  {0,0,3,3,3,3,0,0,0,0},
+					  {0,0,3,0,0,0,0,0,0,0},
+		              {0,0,3,0,0,0,3,3,3,3},
+		              {1,0,3,0,0,3,0,0,0,3},
+			          {0,0,3,0,0,3,0,0,0,3},
+					  {0,0,0,0,0,0,0,0,0,0} };
 	int resultX[100] = {0};
 	int resultY[100] = { 0};
 	CalculatePath(map,10,10, resultX, resultY);
